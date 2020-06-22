@@ -124,9 +124,8 @@
                                   width:100%;
                                   display:block;
                                   margin:0px auto; ">{% if result.sursummary %}{{result.sursummary}}{%endif%}</textarea>
-                    <br>
-                    <hr>
 
+                    <hr>
                     <div class="progress" hidden>
                         <div
                                 id="progressbar"
@@ -142,10 +141,8 @@
                     <div class="form-row align-items-center">
 
                         <div class="form-group col-md-12">
-
                             <button id="statusbtn" class="col-md-12 btn btn-warning" disabled hidden>
                             </button>
-
                         </div>
                     </div>
 
@@ -599,10 +596,8 @@
                     $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
                     $("#ego").val(data.egosummary);
                     $("#sur").val(data.sursummary);
-                    setreset();
-                    $("#responsenext").removeAttr('disabled');
                     $("#response").removeAttr('disabled');
-                    $("#responseprev").removeAttr('disabled');
+                    setreset();
 
                 });
                 return false;

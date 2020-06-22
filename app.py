@@ -50,7 +50,7 @@ def getdata():
             result['target'] = f"static/temp/{Path(vidname).stem}-canvas.MP4"
 
     result['vdata'] = [{'folder': f, 'active': a} for f, a in zip(result['data'], activefolder)]
-    print(result.keys())
+    # print(result.keys())
     return result
 
 
@@ -114,7 +114,7 @@ def getstats():
     # targetname = f"static/temp/{Path(vidname).stem}-canvas.MP4"
     result = utils.getstats(vidname, total)
     # result.update({'target': targetname})
-    print('I am here')
+    # print('I am here')
     return result
 
 

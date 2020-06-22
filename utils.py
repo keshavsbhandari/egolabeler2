@@ -23,7 +23,7 @@ def getcsv():
     return pd.read_csv(label)
 
 def update(vidname, egosummary, sursummary):
-    print('I am here')
+    # print('I am here')
     record = {
         'time' : datetime.timestamp(datetime.now()),
         'vidname':vidname,
