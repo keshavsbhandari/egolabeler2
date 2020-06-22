@@ -1,0 +1,6 @@
+____pycache__
+.DS_Store
+.idea
+**/data
+*.log
+*.MP4

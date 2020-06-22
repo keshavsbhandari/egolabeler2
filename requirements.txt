@@ -1,0 +1,7 @@
+Flask==1.1.2
+pandas==1.0.2
+py360convert==0.1.0
+opencv-python==4.2.0.34
+numpy==1.18.1
+tqdm==4.37.0
+Pillow==7.1.2

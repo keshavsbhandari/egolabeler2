@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Egok Labeler</title>
+        <link rel="stylesheet" href="https://cdn.plyr.io/3.6.2/plyr.css"/>
+
+        <!--        <link rel="stylesheet" href="path/to/plyr.css"/>-->
+    </head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <!-- Bootstrap CSS -->
+    <!--        <link href="https://vjs.zencdn.net/7.8.2/video-js.css" rel="stylesheet"/>-->
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel='stylesheet' href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
+
+
+    <!--    customcsss-->
+
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-7" id="videodiv">
+                    <button id="rotatebtn1" class="btn-danger" style="position: absolute;z-index: 10"><span
+                            class="glyphicon glyphicon-repeat"></span></button>
+                    <video id="player1" playsinline controls style="transform: rotate(0deg);position: relative">
+                        <source src="{% if result.target %} {{result.target}}{%endif%}"
+                                type="video/MP4"/>
+                    </video>
+                </div>
+
+                <div class="col-md-7" id="loadingdiv" hidden>
+                    <img src="static/loading.gif" alt="">
+                </div>
+
+                <div class="col-md-5">
+                    <h1>EGOK360 DATA LABELER</h1>
+                    <form action="/" method="post" name="data">
+                        <div class="form-row align-items-center">
+                            <div class="form-group col-md-12">
+                                <label for="folderselect">Select Data Source</label>
+                                <select class="form-control" id="folderselect" name="datafolder">
+                                    {% for d in result.vdata %}
+                                    <option {% if d.active %} selected {% endif %}>{{d.folder}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <button id="refresh" class="col-md-12 btn btn-primary">Load Videos</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row align-items-center">
+                            <div class="input-group col-md-12">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">Video-List</div>
+                                </div>
+                                <select class="form-control bg-warning" id="vidselect" name="vidname">
+                                    {% for v in result.videos %}
+                                    <option id="vidoption-{{v.sno}}" class="vidoption" vidname="{{v.name}}"
+                                            total="{{result.total}}" vidpath="{{v.path}}"
+                                            sno="{{v.sno}}" {% if v.active %} selected {% endif %}>{{v.sno}}.{{v.name}}
+                                                                                                   &nbsp; &nbsp; &nbsp;
+                                                                                                   &nbsp;
+                                                                                                   &nbsp; &nbsp; &nbsp;
+                                                                                                   &nbsp; &nbsp; &nbsp;
+                                                                                                   &nbsp;----------------&nbsp;
+                                                                                                   &nbsp; &nbsp;of
+                                                                                                   {{result
+                                                                                                   .total}}
+                                                                                                   {% if v.done %}
+                                                                                                   ✅
+                                                                                                   {% else %}
+                                                                                                   ❌
+                                                                                                   {%endif%}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <h1>jQuery Example</h1>
+                    <div class="form-row align-items-center">
+                        <div class="input-group col-md-12">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-default btn-primary input-group-btn prev" disabled>
+                                    <<
+                                </button>
+                            </div>
+                            <input type="text" class="form-control" id="vidbar" disabled>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary input-group-btn next" disabled>
+                                    >>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h1>Summarize : My Action</h1>
+                    <textarea class="bg-warning" id="ego" spellcheck="false"
+                              placeholder="Please summarize my aciton..."
+                              style="margin:10px 10px;
+                                  padding:5px;
+                                  line-height:16px;
+                                  width:100%;
+                                  display:block;
+                                  margin:0px auto; ">{% if result.egosummary %}{{result.egosummary}}{%endif%}</textarea>
+
+                    <h1>Summarize : Surround Action</h1>
+                    <textarea id="sur" spellcheck="false"
+                              placeholder="Please summarize whats happening around..."
+                              style="margin:10px 10px;
+                                  padding:5px;
+                                  line-height:16px;
+                                  width:100%;
+                                  display:block;
+                                  margin:0px auto; ">{% if result.sursummary %}{{result.sursummary}}{%endif%}</textarea>
+                    <br>
+                    <hr>
+
+                    <div class="progress" hidden>
+                        <div
+                                id="progressbar"
+                                class="progress-bar progress-bar-striped progress-bar-animated progress-bar-warning"
+                                role="progressbar"
+                                aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                style="">
+                        </div>
+                    </div>
+
+
+                    <br>
+                    <div class="form-row align-items-center">
+
+                        <div class="form-group col-md-12">
+
+                            <button id="statusbtn" class="col-md-12 btn btn-warning" disabled hidden>
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <br>
+                    <hr>
+
+                    <div class="form-row align-items-center">
+
+                        <div class="form-group col-md-2">
+                            <button id="responseprev" class="col-md-12 btn btn-success"><<
+                            </button>
+                        </div>
+
+                        <div class="form-group col-md-8">
+                            <button id="response" class="col-md-12 btn btn-success">Click to submit your
+                                                                                    response
+                            </button>
+                        </div>
+
+                        <div class="form-group col-md-2">
+                            <button id="responsenext" class="col-md-12 btn btn-success">>>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <script src="https://cdn.plyr.io/3.6.2/plyr.js"></script>
+        <script>
+            const player = new Plyr('#player1');
+        </script>
+    </body>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+    <script>
+
+        function getRotationDegrees(obj) {
+            var matrix = obj.css("transform");
+            if (matrix !== 'none') {
+                var values = matrix.split('(')[1].split(')')[0].split(',');
+                var a = values[0];
+                var b = values[1];
+                var angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+            } else {
+                var angle = 0;
+            }
+            return (angle < 0) ? angle + 360 : angle;
+        }
+
+        $("#rotatebtn1").click(function (e) {
+            var rotate = getRotationDegrees($("#player1")) + 90;
+            $("#player1").css('transform', 'rotate(' + rotate + 'deg)');
+        });
+    </script>
+
+
+    <script type=text/javascript>
+        $(function () {
+            $('#calculate').bind('click', function () {
+                $.getJSON('/_add_numbers', {
+                    a: $('input[name="a"]').val(),
+                    b: $('input[name="b"]').val()
+                }, function (data) {
+                    $("#result").text(data.result);
+                });
+                return false;
+            });
+        });
+    </script>
+
+    <script>
+
+        function setreset() {
+            $("#vidbar").val($("#vidselect").val());
+            total = $("#vidselect option:selected").attr('total');
+            sno = parseInt($("#vidselect option:selected").attr('sno'));
+            if (sno == total) {
+                $(".next").prop('disabled', true);
+                $("#responsenext").prop('disabled', true);
+            } else {
+                $(".next").removeAttr('disabled');
+                $("#responsenext").removeAttr('disabled');
+            }
+            ;
+
+            if (sno == 1) {
+                $(".prev").prop('disabled', true);
+                $("#responseprev").prop('disabled', true);
+            } else {
+                $(".prev").removeAttr('disabled');
+                $("#responseprev").removeAttr('disabled');
+            }
+            ;
+        };
+
+
+        $(document).ready(function () {
+            $("#responsenext").prop('disabled', true);
+            $("#response").prop('disabled', true);
+            $("#responseprev").prop('disabled', true);
+
+            if ($("#vidselect option:selected").attr('total')) {
+                setreset();
+            }
+            ;
+            if (!$("#folderselect").val()) {
+                $("#refresh").prop('disabled', true);
+            } else {
+                $("#refresh").removeAttr('disabled');
+            }
+            ;
+        });
+
+        // $("#vidselect").change(
+        //     function (e) {
+        //         setreset();
+        //     }
+        // );
+
+        // $(function () {
+        //     $('#vidbar').bind('change', function () {
+        //         // alert('dekho piche dekho');
+        //         // $.getJSON('/getstats', {
+        //         //     vidname: $("#vidselect option:selected").attr('vidname'),
+        //         //     total: $("#vidselect option:selected").attr('total')
+        //         // }, function (data) {
+        //         //     $("#progressbar").css('width', data.percent + "%");
+        //         //     $("#statusbtn").text(data.ncount+" of "+data.total+" Completed!!");
+        //         //     $("#ego").val(data.egosummary);
+        //         //     $("#sur").val(data.sursummary);
+        //         // });
+        //         // return false;
+        //         alert('HELLO');
+        //     });
+        // });
+
+
+        $(function () {
+            $('.next').bind('click', function () {
+                tid = parseInt($("#vidselect option:selected").attr('sno'));
+                $("#vidselect").prop('selectedIndex', tid)
+                setreset();
+
+                $("#videodiv").prop('hidden', true);
+                $("#loadingdiv").removeAttr('hidden');
+
+                var vidname = $("#vidselect option:selected").attr('vidname');
+                var total = $("#vidselect option:selected").attr('total');
+                var vidpath = $("#vidselect option:selected").attr('vidpath');
+                $.getJSON('/getvideo', {
+                    vidname: vidname,
+                    vidpath: vidpath,
+                    total: total
+                }, function (data) {
+                    $("#player1").prop('src', data.result);
+                    $("#loadingdiv").prop('hidden', true);
+                    $("#videodiv").removeAttr('hidden');
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+                    setreset();
+
+                });
+                return false;
+            });
+        });
+
+
+        $(function () {
+            $('.prev').bind('click', function () {
+                tid = parseInt($("#vidselect option:selected").attr('sno')) - 2;
+                $("#vidselect").prop('selectedIndex', tid)
+                setreset();
+
+                $("#videodiv").prop('hidden', true);
+                $("#loadingdiv").removeAttr('hidden');
+                $("#loadbtn").removeAttr('hidden');
+
+                $.getJSON('/getvideo', {
+                    vidpath: $("#vidselect option:selected").attr('vidpath'),
+                    vidname: $("#vidselect option:selected").attr('vidname'),
+                    total: $("#vidselect option:selected").attr('total')
+                }, function (data) {
+                    $("#player1").prop('src', data.result);
+                    $("#loadingdiv").prop('hidden', true);
+                    $("#loadbtn").prop('hidden', true);
+                    $("#videodiv").removeAttr('hidden');
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+                    setreset();
+                });
+                return false;
+            });
+        });
+
+
+        $(function () {
+            $('#vidselect').bind('change', function () {
+                setreset();
+                $("#videodiv").prop('hidden', true);
+                $("#loadingdiv").removeAttr('hidden');
+                $("#loadbtn").removeAttr('hidden');
+
+                $.getJSON('/getvideo', {
+                    vidpath: $("#vidselect option:selected").attr('vidpath'),
+                    vidname: $("#vidselect option:selected").attr('vidname'),
+                    total: $("#vidselect option:selected").attr('total')
+                }, function (data) {
+                    $("#result").text(data.result);
+                    $("#player1").prop('src', data.result);
+                    $("#loadingdiv").prop('hidden', true);
+                    $("#loadbtn").prop('hidden', true);
+                    $("#videodiv").removeAttr('hidden');
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            $('#response').bind('click', function () {
+                if (!$("#ego").val() | !$("#sur").val()) {
+                    $('#response').removeClass('btn-success');
+                    $('#response').addClass('btn-danger');
+                    $('#response').text('!!! ERROR ! Both Summary required !!!!')
+                    setTimeout(function () {
+                        $('#response').removeClass('btn-danger');
+                        $('#response').addClass('btn-success');
+                        $('#response').text('Click to submit your response');
+                    }, 4000);
+                    return false;
+                }
+                ;
+                $.getJSON('/saveresponse', {
+                    ego: $("#ego").val(),
+                    sur: $("#sur").val(),
+                    vidname: $("#vidselect option:selected").attr('vidname'),
+                    total: $("#vidselect option:selected").attr('total')
+                }, function (data) {
+                    var update = $("#vidselect option:selected").val().replace("❌", "✅");
+                    $("#vidselect option:selected").text(update);
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+
+                    setreset();
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            $('#responsenext').bind('click', function () {
+                if (!$("#ego").val() | !$("#sur").val()) {
+                    $('#response').removeClass('btn-success');
+                    $('#response').addClass('btn-danger');
+                    $('#response').text('!!! ERROR ! Both Summary required !!!!')
+                    setTimeout(function () {
+                        $('#response').removeClass('btn-danger');
+                        $('#response').addClass('btn-success');
+                        $('#response').text('Click to submit your response');
+                    }, 4000);
+                    return false;
+                }
+                ;
+                $.getJSON('/saveresponse', {
+                    ego: $("#ego").val(),
+                    sur: $("#sur").val(),
+                    vidname: $("#vidselect option:selected").attr('vidname'),
+                    total: $("#vidselect option:selected").attr('total')
+                }, function (data) {
+                    var update = $("#vidselect option:selected").val().replace("❌", "✅");
+                    $("#vidselect option:selected").text(update);
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+
+                    setreset();
+                    $(".next").click();
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            $('#responseprev').bind('click', function () {
+                if (!$("#ego").val() | !$("#sur").val()) {
+                    $('#response').removeClass('btn-success');
+                    $('#response').addClass('btn-danger');
+                    $('#response').text('!!! ERROR ! Both Summary required !!!!')
+                    setTimeout(function () {
+                        $('#response').removeClass('btn-danger');
+                        $('#response').addClass('btn-success');
+                        $('#response').text('Click to submit your response');
+                    }, 4000);
+                    return false;
+                }
+                ;
+                $.getJSON('/saveresponse', {
+                    ego: $("#ego").val(),
+                    sur: $("#sur").val(),
+                    vidname: $("#vidselect option:selected").attr('vidname'),
+                    total: $("#vidselect option:selected").attr('total')
+                }, function (data) {
+                    var update = $("#vidselect option:selected").val().replace("❌", "✅");
+                    $("#vidselect option:selected").text(update);
+
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+
+                    setreset();
+                    $(".prev").click();
+                });
+                return false;
+            });
+        });
+
+        $(function () {
+            $('#ego').bind('click', function () {
+                $('#response').removeClass('btn-danger');
+                $('#response').addClass('btn-success');
+                $('#response').text('Click to submit your response');
+            });
+        });
+
+        $(function () {
+            $('#sur').bind('click', function () {
+                $('#response').removeClass('btn-danger');
+                $('#response').addClass('btn-success');
+                $('#response').text('Click to submit your response');
+            });
+        });
+
+        String.prototype.format = function () {
+            var i = 0, args = arguments;
+            return this.replace(/{}/g, function () {
+                return typeof args[i] != 'undefined' ? args[i++] : '';
+            });
+        };
+
+        $(function () {
+            $("#folderselect").bind('change', function (e) {
+                $('#refresh').click();
+            });
+        });
+
+        $(function () {
+            $('#refresh').bind('click', function (e) {
+                e.preventDefault();
+
+                $("#videodiv").prop('hidden', true);
+                $("#loadingdiv").removeAttr('hidden');
+
+                vidname = $("#vidselect option:selected").attr('vidname');
+                datafolder = $("#folderselect option:selected").val();
+                $.getJSON('/getdata', {
+                    vidname: $("#vidselect option:selected").val(),
+                    datafolder: $("#folderselect option:selected").val(),
+                }, function (data) {
+                    var folderselectcontent = "";
+                    for (const x of data.vdata) {
+                        // alert(x.folder);
+                        var selected = "";
+                        if (x.active) {
+                            selected = "selected"
+                        }
+                        folderselectcontent += "<option  {}>{}</option>".format(selected, x.folder);
+                    }
+                    var vidselectcontent = "";
+                    $("#folderselect").html(folderselectcontent);
+                    for (const v of data.videos) {
+                        // alert(x.folder);
+                        var done = "❌";
+                        if (v.done) {
+                            done = "✅";
+                        }
+
+                        var selected = "";
+                        if (v.active) {
+                            selected = "selected";
+                            // $("#player1").prop('src', "static/temp/"+v.name.replace(".MP4","")+"-canvas.MP4");
+                            $("#player1").prop('src', v.target);
+                            $("#loadingdiv").prop('hidden', true);
+                            $("#videodiv").removeAttr('hidden');
+                        }
+
+                        var sno = v.sno;
+                        var name = v.name;
+                        var total = data.total;
+                        var path = v.path;
+
+                        vidselectcontent +=
+                            "<option id={} class='vidoption' vidname={} total= {} vidpath={} sno = {} {}>{}.{} &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;----------------&nbsp;&nbsp; &nbsp; of {} {}</option>".format(sno, name, total, path, sno, selected, sno, name, total, done)
+                    }
+                    $("#vidselect").html(vidselectcontent);
+                    $(".progress").removeAttr('hidden');
+                    $("#progressbar").css('width', data.percent + "%");
+                    $("#progressbar").text(data.percent + "%");
+                    $("#statusbtn").removeAttr('hidden');
+                    $("#statusbtn").text(data.ncount + " of " + data.total + " Completed!!");
+                    $("#ego").val(data.egosummary);
+                    $("#sur").val(data.sursummary);
+                    setreset();
+                    $("#responsenext").removeAttr('disabled');
+                    $("#response").removeAttr('disabled');
+                    $("#responseprev").removeAttr('disabled');
+
+                });
+                return false;
+            });
+        });
+
+    </script>
+
+    <script>
+        function expandTextarea(id) {
+            document.getElementById(id).addEventListener('keyup', function () {
+                this.style.overflow = 'hidden';
+                this.style.height = 0;
+                this.style.height = this.scrollHeight + 'px';
+            }, false);
+        }
+
+        expandTextarea('ego');
+        expandTextarea('sur');
+    </script>
+
+</html>
