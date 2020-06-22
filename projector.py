@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
+import os
 
 
 
@@ -42,7 +43,7 @@ def canvas_to_video(vidname='egok360-Lunch-Eating-2382.MP4', target = 'canvas.mp
     fps = cap.get(cv2.CAP_PROP_FPS)
     canvas = cv2.VideoWriter(target, cv2.VideoWriter_fourcc(*'H264'), fps, (1300, 1300))
     frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    for n in tqdm(range(int(frame_count))):
+    for _ in tqdm(range(int(frame_count))):
         ret, frame = cap.read()
         canvas.write(get_canvas(frame))
     cap.release()
