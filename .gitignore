@@ -1,6 +1,6 @@
 __pycache__clea
 .DS_Store
 .idea
-**/data
+data/*
 *.log
 *.MP4
