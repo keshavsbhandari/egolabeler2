@@ -38,13 +38,14 @@ def get_canvas(frame):
     return canvas
 
 
-def canvas_to_video(vidname='egok360-Lunch-Eating-2382.MP4', target = 'canvas.mp4'):
+def canvas_to_video(vidname='egok360-Lunch-Eating-2382.MP4', target = 'canvas.mp4', vidsize = (1300, 1300)):
+    vidsize = (600, 600)
     cap = cv2.VideoCapture(vidname)
     fps = cap.get(cv2.CAP_PROP_FPS)
-    canvas = cv2.VideoWriter(target, cv2.VideoWriter_fourcc(*'H264'), fps, (600, 600))
+    canvas = cv2.VideoWriter(target, cv2.VideoWriter_fourcc(*'H264'), fps, vidsize)
     frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     for _ in tqdm(range(int(frame_count))):
         ret, frame = cap.read()
-        canvas.write(cv2.resize(get_canvas(frame), (600,600)))
+        canvas.write(cv2.resize(get_canvas(frame), vidsize))
     cap.release()
     canvas.release()
