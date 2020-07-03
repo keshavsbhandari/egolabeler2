@@ -7,9 +7,13 @@ https://egok360.github.io/
 
 1. Download Dataset Sub-Folder wise and put sub-folder(or action folder) inside data folder in this project
 2. Create a conda environment [Assumption latest anaconda/miniconda is installed, linux or mac]
+    
     conda create -n egolabeler python=3.7
+    
     conda activate egolabeler
+    
     pip install -r requirements.txt
+    
 3. Now run following to start flask server and start labeling dataset one by one
     python app.py
     
